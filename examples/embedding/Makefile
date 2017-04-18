@@ -11,6 +11,8 @@ ifndef BIN
 endif
 
 #=============================================================================
+SPAWN ?= $1
+
 # this source directory where embedding.c is located
 SRCDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
@@ -18,9 +20,10 @@ SRCDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 EXE := $(suffix $(abspath $(JULIA)))
 
 # get compiler and linker flags. (see: `contrib/julia-config.jl`)
-CFLAGS += -lm $(shell $(SPAWN) $(JULIA) -e \
-                           'include(joinpath(JULIA_HOME,Base.DATAROOTDIR,"julia","julia-config.jl"))' \
-                           -- --cflags --ldflags --ldlibs)
+JULIA_CONFIG := $(JULIA) -e 'include(joinpath(JULIA_HOME, Base.DATAROOTDIR, "julia", "julia-config.jl"))' --
+CPPFLAGS-add :=
+CFLAGS-add = $(shell $(call SPAWN,$(JULIA_CONFIG) --cflags))
+LDFLAGS-add = -lm $(shell $(call SPAWN,$(JULIA_CONFIG) --ldflags --ldlibs))
 
 DEBUGFLAGS += -g
 
@@ -30,13 +33,17 @@ release: $(BIN)/embedding$(EXE)
 debug:   $(BIN)/embedding-debug$(EXE)
 
 $(BIN)/embedding$(EXE): $(SRCDIR)/embedding.c
-	$(CC) $^ -o $@ $(CFLAGS)
+	$(CC) $^ -o $@ $(CPPFLAGS-add) $(CPPFLAGS) $(CFLAGS-add) $(CFLAGS) $(LDFLAGS-add) $(LDFLAGS)
 
 $(BIN)/embedding-debug$(EXE): $(SRCDIR)/embedding.c
-	$(CC) $^ -o $@ $(CFLAGS) $(DEBUGFLAGS)
+	$(CC) $^ -o $@ $(CPPFLAGS-add) $(CPPFLAGS) $(CFLAGS-add) $(CFLAGS) $(LDFLAGS-add) $(LDFLAGS) $(DEBUGFLAGS)
 
 clean:
-	@rm -f $(BIN)/embedding-debug$(EXE) $(BIN)/embedding$(EXE)
+	-rm -f $(BIN)/embedding-debug$(EXE) $(BIN)/embedding$(EXE)
 
 .PHONY: release debug clean
 
+# Makefile debugging trick:
+# call print-VARIABLE to see the runtime value of any variable
+print-%:
+	@echo '$*=$($*)'

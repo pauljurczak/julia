@@ -1,25 +1,25 @@
+## this is a simple wrapper just to forward on known commands to the
+## embedding example with values pulled from Make.inc
 SRCDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-BUILDDIR := .
 JULIAHOME := $(abspath $(SRCDIR)/..)
+BUILDDIR := .
 include $(JULIAHOME)/Make.inc
 
-outdir := $(libexecdir)
+release: # default target
+all: release debug
 
-embedding_binary := $(abspath $(outdir)/embedding$(JULIA_LIBSUFFIX)$(EXE))
+embedding-args := \
+	-C $(BUILDROOT)/examples/embedding \
+	JULIA='$(JULIA_EXECUTABLE)' BIN='$(build_libexecdir)' \
+	SPAWN='$(value spawn)' CC='$(CC)'
 
-release: embedding
-debug: embedding-debug
+release debug:
+	@$(MAKE) $@ $(embedding-args)
 
-embedding: $(embedding_binary)
-embedding-debug: $(embedding_binary)
-
-$(embedding_binary): $(wildcard embedding/*)
-	@$(MAKE) $(QUIET_MAKE) -C $(BUILDROOT)/examples/embedding $(JULIA_BUILD_MODE) \
-                                JULIA="$(bindir)/julia$(JULIA_LIBSUFFIX)$(EXE)" BIN="$(outdir)" \
-                                SPAWN="$(spawn)" CC="$(CC)"
+eprint-%:
+	@$(MAKE) print-$* $(embedding-args)
 
 clean:
-	-rm -f $(embedding_binary) $(embedding_binary)-debug
+	@$(MAKE) clean $(embedding-args)
 
-.PHONY: all embedding clean
-
+.PHONY: all release debug clean eprint-*

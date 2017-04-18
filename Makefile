@@ -339,7 +339,6 @@ install: $(build_depsbindir)/stringreplace $(BUILDROOT)/doc/_build/html/en/index
 	done
 
 	$(INSTALL_M) $(build_bindir)/julia* $(DESTDIR)$(bindir)/
-	-cp -a $(build_libexecdir) $(DESTDIR)$(prefix)
 ifeq ($(OS),WINNT)
 	-$(INSTALL_M) $(build_bindir)/*.dll $(DESTDIR)$(bindir)/
 	-$(INSTALL_M) $(build_libdir)/libjulia.dll.a $(DESTDIR)$(libdir)/
@@ -420,6 +419,10 @@ endif
 	mkdir -p $(DESTDIR)$(sysconfdir)
 	cp -R $(build_sysconfdir)/julia $(DESTDIR)$(sysconfdir)/
 
+	# Install the embedding example executable with the new binary path
+	make -C $(JULIAHOME)/examples release build_libexecdir=$(DESTDIR)$(libexecdir) JULIA_EXECUTABLE=$(DESTDIR)$(bindir)/julia
+	make -C $(JULIAHOME)/examples debug build_libexecdir=$(DESTDIR)$(libexecdir) JULIA_EXECUTABLE=$(DESTDIR)$(bindir)/julia-debug
+
 distclean dist-clean:
 	-rm -fr $(BUILDROOT)/julia-*.tar.gz $(BUILDROOT)/julia*.exe $(BUILDROOT)/julia-*.7z $(BUILDROOT)/julia-$(JULIA_COMMIT)
 
@@ -467,6 +470,7 @@ ifeq ($(USE_GPL_LIBS), 1)
 		cp busybox.exe $(BUILDROOT)/julia-$(JULIA_COMMIT)/bin )
 endif
 	cd $(BUILDROOT)/julia-$(JULIA_COMMIT)/bin && rm -f llvm* llc.exe lli.exe opt.exe LTO.dll bugpoint.exe macho-dump.exe
+	rm -r $(BUILDROOT)/julia-$(JULIA_COMMIT)/$(libexecdir) # embedding example isn't configured for relocating after installation
 
 	# create file listing for uninstall. note: must have Windows path separators and line endings.
 	cd $(BUILDROOT)/julia-$(JULIA_COMMIT) && find * | sed -e 's/\//\\/g' -e 's/$$/\r/g' > etc/uninstall.log
