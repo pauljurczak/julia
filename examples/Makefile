@@ -10,8 +10,9 @@ all: release debug
 
 embedding-args := \
 	-C $(BUILDROOT)/examples/embedding \
-	JULIA='$(JULIA_EXECUTABLE)' BIN='$(build_libexecdir)' \
-	SPAWN='$(value spawn)' CC='$(CC)'
+	JULIA='$(call spawn,$(JULIA_EXECUTABLE))' \
+	BIN='$(build_bindir)' \
+	CC='$(CC)'
 
 release debug:
 	@$(MAKE) $@ $(embedding-args)

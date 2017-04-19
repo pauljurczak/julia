@@ -11,8 +11,6 @@ ifndef BIN
 endif
 
 #=============================================================================
-SPAWN ?= $1
-
 # this source directory where embedding.c is located
 SRCDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
@@ -22,8 +20,8 @@ EXE := $(suffix $(abspath $(JULIA)))
 # get compiler and linker flags. (see: `contrib/julia-config.jl`)
 JULIA_CONFIG := $(JULIA) -e 'include(joinpath(JULIA_HOME, Base.DATAROOTDIR, "julia", "julia-config.jl"))' --
 CPPFLAGS-add :=
-CFLAGS-add = $(shell $(call SPAWN,$(JULIA_CONFIG) --cflags))
-LDFLAGS-add = -lm $(shell $(call SPAWN,$(JULIA_CONFIG) --ldflags --ldlibs))
+CFLAGS-add = $(shell $(JULIA_CONFIG) --cflags)
+LDFLAGS-add = -lm $(shell $(JULIA_CONFIG) --ldflags --ldlibs)
 
 DEBUGFLAGS += -g
 

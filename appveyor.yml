@@ -55,5 +55,6 @@ build_script:
 test_script:
   - usr\bin\julia -e "versioninfo()"
   - usr\bin\julia --precompiled=no -e "true"
-  - cd julia-* && .\bin\julia.exe --check-bounds=yes share\julia\test\runtests.jl all &&
-      .\bin\julia.exe --check-bounds=yes share\julia\test\runtests.jl libgit2-online download pkg embedding
+  #- cd julia-* && .\bin\julia.exe --check-bounds=yes share\julia\test\runtests.jl all &&
+  #    .\bin\julia.exe --check-bounds=yes share\julia\test\runtests.jl libgit2-online download pkg
+  - usr\bin\embedding 2>NUL | usr\bin\julia usr\share\doc\julia\examples\embedding\embedding-test.jl
