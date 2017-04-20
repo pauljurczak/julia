@@ -812,7 +812,7 @@ finally
 end
 ```
 
-When control leaves the `try` block (for example due to a `return`, or just finishing normally),
+When control leaves the `try` block (for example due to a `return`, exception, or just finishing normally),
 `close(f)` will be executed. If the `try` block exits due to an exception, the exception will
 continue propagating. A `catch` block may be combined with `try` and `finally` as well. In this
 case the `finally` block will run after `catch` has handled the error.
